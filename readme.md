@@ -492,6 +492,22 @@ Here's how I deal with the cookie/session lifecycle:
 
 Besides `HttpOnly` and `Expires`, I set the `Path` attribute of the cookie since otherwise the cookie doesn't seem to be preserved when all tabs of the browser are closed.
 
+The following security headers are useful:
+
+```
+// Avoids clickjacking. For example: your app being placed on an iframe and then overlaid with elements on top that hide what the user is really clicking on.
+res.setHeader ('X-Frame-Options', 'SAMEORIGIN');
+
+// If the app allows users to upload and share content with each other through the app, this header avoids non-js to be interpreted as js, therefore closing the door to malicious injecting of js by a user.
+res.setHeader ('X-Content-Type-Options', 'nosniff');
+
+// Even if we redirect all http traffic to https with nginx, this header avoids the very first request going through http. This avoids first-visit attacks. The browser just remembers to only use https.
+res.setHeader ('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+
+// Avoids third party scripts from being loaded. If you use a CDN, you must explicitly allow the resources that you load through it.
+res.setHeader ('Content-Security-Policy', "default-src 'self'; script-src 'self'; object-src 'none';");
+```
+
 ## Routes
 
 Both in çiçek and express, routes are executed in the order in which they are defined. A request might be matched by one or more routes, executed in order. Any route has the power to either "pass" the request to the next matching route, or instead to reply to that request from itself. It can't, however, do both.
